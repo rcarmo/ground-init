@@ -1,0 +1,110 @@
+---
+flatpak:
+  remotes:
+    - name: flathub
+      url: https://flathub.org/repo/flathub.flatpakrepo
+  apps:
+    - org.blender.Blender
+
+copr:
+  - patrickl/yabridge-stable
+
+packages:
+  # RPM Fusion
+  - https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
+  - https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+  # Baseline
+  - cabextract
+  - curl
+  - dconf-editor
+  - docker
+  - ffmpeg
+  - fira-code-fonts
+  - flatseal
+  - fontconfig
+  - git
+  - gnome-extensions-app
+  - gnome-shell-extension-dash-to-dock
+  - gnome-shell-extension-pop-shell
+  - gnome-shell-extension-user-theme
+  - gnome-system-log
+  - gnome-tweaks
+  - godot
+  - godot
+  - golang
+  - handbrake
+  - htop
+  - igt-gpu-tools
+  - intel-media-driver
+  - keepassxc
+  - kvantum
+  - liberation-fonts
+  - libva-intel-driver
+  - libva-utils
+  - lm_sensors
+  - openscad
+  - python3-pip
+  - remmina
+  - rpm-build
+  - rsms-inter-fonts 
+  - stow
+  - syncthing
+  - tmux
+  - vim
+  - wine
+  - winetricks
+  - xorg-x11-font-utils
+  - yabridge
+  # MS Core Fonts
+  - https://downloads.sourceforge.net/project/mscorefonts2/rpms/msttcore-fonts-installer-2.6-1.noarch.rpm
+
+build:
+  root: ${HOME}/Build
+  repositories:
+    # Theme Repositories
+    - url: https://github.com/vinceliuice/WhiteSur-gtk-theme
+      commands:
+        # Change this to Dark if needed
+        - ./install.sh -i fedora -l -c Light
+        - ./tweaks.sh -i fedora --flatpak --firefox --dash-to-dock
+    - url: https://github.com/vinceliuice/WhiteSur-icon-theme
+      commands:
+        # this one errors out due to a subcommand
+        - ./install.sh || true
+    - url: https://github.com/vinceliuice/WhiteSur-kde
+      commands:
+        - ./install.sh
+    - url: https://github.com/vinceliuice/WhiteSur-cursors
+      commands:
+        - ./install.sh
+    # Bitwig DAW
+    - url: https://github.com/teervo/bitwig-fedora
+      commands:
+        - ./bitwig-rpm.sh
+        - rm -rf rpmbuild
+        - sudo dnf copr enable aflyhorse/libjpeg
+        - sudo dnf install bitwig-studio-*.rpm
+
+runcmd:
+  - gsettings set org.gnome.desktop.interface cursor-theme WhiteSur-cursors
+  - gsettings set org.gnome.desktop.interface gtk-theme WhiteSur-Light
+  - gsettings set org.gnome.desktop.interface icon-theme WhiteSur
+  - gsettings set org.gnome.desktop.interface font-antialiasing rgba
+  - gsettings set org.gnome.desktop.interface font-hinting slight
+  - gsettings set org.gnome.desktop.interface font-name 'Inter 11'
+  - gsettings set org.gnome.desktop.interface document-font-name 'Inter 11'
+  - gsettings set org.gnome.desktop.interface monospace-font-name 'Fira Code 10'
+  - gsettings set org.gnome.desktop.wm.preferences titlebar-font 'Inter Bold 11'
+  - gsettings set org.gnome.desktop.wm.preferences button-layout 'close,minimize,maximize:appmenu'
+  - xdg-desktop-menu forceupdate
+  # For Spitfire Audio VSTs
+  - winetricks dxvk
+  # Audio and other tweaks
+  - echo -e '@audio - rtprio 90\n@audio - memlock unlimited' | sudo tee -a /etc/security/limits.d/audio.conf
+  - echo 'fs.inotify.max_user_watches=600000' | sudo tee -a /etc/sysctl.conf
+
+groups:
+  docker: ${USER}
+  dialout: ${USER}
+  audio: ${USER}
+  video: ${USER}
