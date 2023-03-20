@@ -19,4 +19,4 @@ You can execute each target in the `YAML` file independently if you want, or the
 
 ## Sample File
 
-The current sample is the baseline install I do on a blank Fedora 37 machine. Editing this for other Linux distributions (or for macOS) should be trivial to-do and is left as an exercise to the reader.
+The current sample is the baseline install I do on a blank Fedora 37 machine. Editing this for other Linux distributions (or for macOS) should be trivial to do, and is left as an exercise to the reader.
