@@ -87,9 +87,9 @@ def on_packages(context: list) -> None:
     distro = freedesktop_os_release()["ID"]
     packages = " ".join(context)
     if distro == "fedora":
-        run(f"sudo dnf install {packages}", check=True, shell=True)
+        run(f"sudo dnf install -y {packages}", check=True, shell=True)
     elif distro in ["ubuntu", "debian"]:
-        run(f"sudo apt install {packages}", check=True, shell=True)
+        run(f"sudo apt install -y {packages}", check=True, shell=True)
     else:
         log.error(f"Cannot determine how to install packages in {distro}, exiting")
         exit(-1)
@@ -103,7 +103,7 @@ def on_runcmd(context: list) -> None:
     """
     for cmd in context:
         log.info(cmd)
-        run(cmd, check=True, shell=True)
+        run(cmd, check=False, shell=True)
 
 
 def on_groups(context: dict) -> None:
@@ -141,7 +141,7 @@ def on_package_upgrade(context: bool) -> None:
         exit(-1)
 
 
-def on_write_files(context: list) ->  None:
+def on_write_files(context: list) -> None:
     """Write files
 
     Args:
@@ -153,16 +153,16 @@ def on_write_files(context: list) ->  None:
             if not exists(base):
                 log.warning(f"--> Creating {base}")
                 makedirs(base)
-            if file.get("append", "false") == "true":
+            if file.get("append", false):
                 mode = "wa"
             else:
                 mode = "w"
-            with open(file["path"],mode) as h:
+            with open(file["path"], mode) as h:
                 h.write(file["content"])
         except Exception as e:
             log.error(e)
             exit(-1)
-        
+
 
 def on_build(context: list) -> None:
     """Repositories to build locally
@@ -193,6 +193,7 @@ def on_build(context: list) -> None:
         except CalledProcessError as e:
             log.error(e)
             exit(-1)
+
 
 def main(args: Namespace) -> None:
     actions = get_context(args.filename)
