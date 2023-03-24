@@ -202,8 +202,8 @@ def main(args: Namespace) -> None:
     for step in steps:
         if step in actions.keys():
             name = f"on_{step}"
-            if name in dir():
-                locals()[name](actions[step])
+            if name in globals():
+                globals()[name](actions[step])
 
 
 if __name__ == "__main__":
