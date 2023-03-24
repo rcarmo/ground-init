@@ -13,7 +13,7 @@ The name is a pun on [`cloud-init`](https://cloud-init.io/) (which I use for eve
 ## Usage
 
 ```bash
-Ground-init provisioning script [-h] [--steps STEPS [STEPS ...]] filename
+python ground-init.py [-h] [--steps STEPS [STEPS ...]] filename
 ```
 You can execute each step in the `YAML` file independently if you want, or the script will blindly go through them all. Sane ordering isn't implemented (yet) because Python 3.10 and later have ordered dictionaries, so the ordering in the file works for me (but I intend to enforce some restrictions).
 
