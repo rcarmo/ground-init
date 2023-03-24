@@ -1,3 +1,5 @@
+#!/bin/env python3
+
 from grp import getgrall
 from logging import (
     DEBUG,
@@ -10,8 +12,10 @@ from logging import (
     Formatter,
     StreamHandler,
 )
+from argparse import ArgumentParser, Namespace
+from platform import freedesktop_os_release
 from os import chdir, environ, makedirs
-from os.path import exists, expandvars, join, basename
+from os.path import exists, expandvars, join, basename, dirname
 from re import compile
 from subprocess import run, CalledProcessError
 from sys import argv
@@ -19,9 +23,7 @@ from sys import argv
 from yaml import SafeLoader, load
 
 log = getLogger()
-basicConfig(
-    format="%(asctime)s %(levelname)s %(message)s (%(filename)s:%(lineno)d)", level=INFO
-)
+basicConfig(format="%(levelname)s %(message)s (%(filename)s:%(lineno)d)", level=INFO)
 
 
 def get_context(filename: str) -> dict:
@@ -80,9 +82,17 @@ def on_packages(context: list) -> None:
     """Packages to install
 
     Args:
-        context (list): List of packages (can include URLs for dnf to fetch)
+        context (list): List of packages (can include URLs for dnf/apt to fetch)
     """
-    run(f"sudo dnf install {' '.join(context)}", check=True, shell=True)
+    distro = freedesktop_os_release()["ID"]
+    packages = " ".join(context)
+    if distro == "fedora":
+        run(f"sudo dnf install {packages}", check=True, shell=True)
+    elif distro in ["ubuntu", "debian"]:
+        run(f"sudo apt install {packages}", check=True, shell=True)
+    else:
+        log.error(f"Cannot determine how to install packages in {distro}, exiting")
+        exit(-1)
 
 
 def on_runcmd(context: list) -> None:
@@ -109,19 +119,60 @@ def on_groups(context: dict) -> None:
             users = [users]
         for user in users:
             cmd = f"sudo usermod -aG {group} {user}"
-            log.warn(cmd)
+            log.warning(cmd)
             run(cmd, check=True, shell=True)
 
 
-def on_build(context: dict) -> None:
+def on_package_upgrade(context: bool) -> None:
+    """Package Upgrade
+
+    Args:
+        context (boolean):
+    """
+    if not context:
+        return
+    distro = freedesktop_os_release()["ID"]
+    if distro == "fedora":
+        run(f"sudo dnf update -y", check=True, shell=True)
+    elif distro in ["ubuntu", "debian"]:
+        run(f"sudo apt update && sudo apt dist-upgrade -y", check=True, shell=True)
+    else:
+        log.error(f"Cannot determine how to upgrade packages in {distro}, exiting")
+        exit(-1)
+
+
+def on_write_files(context: list) ->  None:
+    """Write files
+
+    Args:
+        context (list): List of file specifications (path, append, content) to write.
+    """
+    for file in context:
+        base = dirname(file["path"])
+        try:
+            if not exists(base):
+                log.warning(f"--> Creating {base}")
+                makedirs(base)
+            if file.get("append", "false") == "true":
+                mode = "wa"
+            else:
+                mode = "w"
+            with open(file["path"],mode) as h:
+                h.write(file["content"])
+        except Exception as e:
+            log.error(e)
+            exit(-1)
+        
+
+def on_build(context: list) -> None:
     """Repositories to build locally
 
     Args:
-        context (dict): List of repositories to clone locally and commands to execute inside them.
+        context (list): List of repositories to clone locally and commands to execute inside them.
     """
     path = context.get("root", expandvars("${HOME}/tmp/build"))
     if not exists(path):
-        log.warn(f"--> Creating {path}")
+        log.warning(f"--> Creating {path}")
         makedirs(path)
     repos = context.get("repositories", [])
     for repo in repos:
@@ -143,14 +194,21 @@ def on_build(context: dict) -> None:
             log.error(e)
             exit(-1)
 
-
-if __name__ == "__main__":
-    actions = get_context("ground-init.yaml")
+def main(args: Namespace) -> None:
+    actions = get_context(args.filename)
     steps = actions.keys()
-    if argv[1:]:
-        steps = filter(lambda x: x in argv[1:], actions.keys())
+    if args.steps:
+        steps = filter(lambda x: x in args.steps, actions.keys())
     for step in steps:
         if step in actions.keys():
             name = f"on_{step}"
             if name in dir():
                 locals()[name](actions[step])
+
+
+if __name__ == "__main__":
+    p = ArgumentParser("Ground-init provisioning script")
+    p.add_argument("--steps", type=str, nargs="+", help="list of steps to execute")
+    p.add_argument("filename", type=str, help="YAML file")
+    args = p.parse_args()
+    main(args)
