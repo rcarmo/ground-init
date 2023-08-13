@@ -154,7 +154,7 @@ def on_write_files(context: list) -> None:
                 log.warning(f"--> Creating {base}")
                 makedirs(base)
             if file.get("append", False):
-                mode = "wa"
+                mode = "a"
             else:
                 mode = "w"
             with open(file["path"], mode) as h:
