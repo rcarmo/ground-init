@@ -153,7 +153,7 @@ def on_write_files(context: list) -> None:
             if not exists(base):
                 log.warning(f"--> Creating {base}")
                 makedirs(base)
-            if file.get("append", false):
+            if file.get("append", False):
                 mode = "wa"
             else:
                 mode = "w"
