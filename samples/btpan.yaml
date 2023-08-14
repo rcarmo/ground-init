@@ -1,0 +1,54 @@
+#cloud-config
+
+# Sets up Bluetooth PAN on a Raspberry Pi
+
+package_upgrade: true
+
+packages:
+  - bluez
+  - bluez-tools
+  
+write_files:
+  - path: /etc/systemd/system/bt-agent.service
+    content: |
+      [Unit]
+      Description=Bluetooth Agent
+      [Service]
+      ExecStart=/usr/bin/bt-agent -c NoInputNoOutput
+      Type=simple
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/systemd/system/bt-network.service
+    content: |
+      [Unit]
+      Description=Bluetoot PAN
+      After=pan0.network
+      [Service]
+      ExecStart=/usr/bin/bt-network -s nap pan0
+      ExecStartPost=bt-adapter --set Discoverable 1
+      Type=simple
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/systemd/network/pan0.netdev
+    content: |
+      [NetDev]
+      Name=pan0
+      Kind=bridge
+
+  - path: /etc/systemd/network/pan0.network
+    content: |
+      [Match]
+      Name=pan0
+
+runcmd:
+  # Adjust to taste
+  - systemctl enable systemd-networkd
+  - systemctl start systemd-networkd
+  - systemctl enable bt-agent
+  - systemctl start bt-agent
+  - systemctl enable bt-network
+  - systemctl start bt-network
+  - bt-adapter --set Discoverable 1
+

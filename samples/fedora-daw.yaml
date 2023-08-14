@@ -1,0 +1,154 @@
+# This is the baseline install I do on a blank Fedora 37 machine for music production
+ 
+---
+flatpak:
+  remotes:
+    - name: flathub
+      url: https://flathub.org/repo/flathub.flatpakrepo
+  apps:
+    - org.blender.Blender
+    - com.plexamp.Plexamp
+
+copr:
+  - patrickl/yabridge-stable
+  # Generic music stuff, including Surge XT
+  - ycollet/audinux 
+
+write_files:
+  - path: ${HOME}/.backup/README.md
+    content: |
+      This is a backup directory for vim.
+
+package_upgrade: true
+packages:
+  # RPM Fusion
+  - https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
+  - https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+  # Baseline
+  - curl
+  - docker
+  - git
+  - golang
+  - htop
+  - lm_sensors
+  - python3-pip
+  - remmina
+  - stow
+  - syncthing
+  - tmux
+  - util-linux-user
+  - vim
+  - zsh
+  # Development
+  - sqlite
+  - clang-tools-extra
+  # uncomment for headless/WSL
+  #- keychain
+  # GNOME survival kit
+  - flatseal
+  - dconf-editor
+  - gnome-epub-thumbnailer
+  - gnome-extensions-app
+  - gnome-shell-extension-appindicator
+  - gnome-shell-extension-dash-to-dock
+  - gnome-shell-extension-pop-shell
+  - gnome-shell-extension-user-theme
+  - gnome-system-log
+  - gnome-tweaks
+  - keepassxc
+  - kvantum
+  # Graphics and CAD
+  - openscad
+  - godot
+  - gimp
+  - libheif-tools
+  - heif-pixbuf-loader
+  - ffmpegthumbnailer
+  # Video hardware acceleration
+  - ffmpeg
+  - handbrake
+  - igt-gpu-tools
+  - intel-media-driver
+  - libva-intel-driver
+  - libva-utils
+  # Music
+  - rpm-build
+  - surge-xt
+  - wine
+  - winetricks
+  - yabridge
+  # Font Stack
+  - cabextract
+  - fontconfig
+  - xorg-x11-font-utils
+  - liberation-fonts
+  - fira-code-fonts
+  - rsms-inter-fonts
+  - https://downloads.sourceforge.net/project/mscorefonts2/rpms/msttcore-fonts-installer-2.6-1.noarch.rpm
+
+build:
+  root: ${HOME}/Build
+  repositories:
+    # Theme Repositories
+    - url: https://github.com/vinceliuice/WhiteSur-gtk-theme
+      commands:
+        # Change this to Dark if needed
+        - ./install.sh -i fedora -l -c Light
+        - ./tweaks.sh -i fedora --flatpak --firefox --dash-to-dock
+    - url: https://github.com/vinceliuice/WhiteSur-icon-theme
+      commands:
+        # this one errors out due to a subcommand
+        - ./install.sh || true
+    - url: https://github.com/vinceliuice/WhiteSur-kde
+      commands:
+        - ./install.sh
+    - url: https://github.com/vinceliuice/WhiteSur-cursors
+      commands:
+        - ./install.sh
+    # Bitwig DAW
+    - url: https://github.com/teervo/bitwig-fedora
+      commands:
+        - ./bitwig-rpm.sh
+        - rm -rf rpmbuild
+        - sudo dnf copr enable aflyhorse/libjpeg
+        - sudo dnf install bitwig-studio-*.rpm
+
+runcmd:
+  - gsettings set org.gnome.desktop.interface cursor-theme WhiteSur-cursors
+  - gsettings set org.gnome.desktop.interface gtk-theme WhiteSur-Light
+  - gsettings set org.gnome.desktop.interface icon-theme WhiteSur
+  - gsettings set org.gnome.desktop.interface font-antialiasing rgba
+  - gsettings set org.gnome.desktop.interface font-hinting slight
+  - gsettings set org.gnome.desktop.interface font-name 'Inter 11'
+  - gsettings set org.gnome.desktop.interface document-font-name 'Inter 11'
+  - gsettings set org.gnome.desktop.interface monospace-font-name 'Fira Code 10'
+  - gsettings set org.gnome.desktop.wm.preferences titlebar-font 'Inter Bold 11'
+  - gsettings set org.gnome.desktop.wm.preferences button-layout 'close,minimize,maximize:appmenu'
+  - xdg-desktop-menu forceupdate
+  - fc-cache ${HOME}/.local/share/fonts
+  # Tailscale
+  - sudo dnf config-manager --add-repo https://pkgs.tailscale.com/stable/fedora/tailscale.repo
+  - sudo dnf install tailscale
+  - sudo systemctl enable --now tailscaled
+  # Microsoft repositories
+  - sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
+  - sudo dnf config-manager --add-repo https://packages.microsoft.com/yumrepos/azure-cli
+  - sudo dnf config-manager --add-repo https://packages.microsoft.com/yumrepos/edge
+  - sudo dnf config-manager --add-repo https://packages.microsoft.com/yumrepos/vscode
+  # dotnet
+  - sudo dnf config-manager --add-repo https://packages.microsoft.com/yumrepos/microsoft-fedora37-prod
+  - sudo dnf install code microsoft-edge-stable
+  # For Spitfire Audio VSTs
+  - winetricks dxvk
+  # TODO: Figure out an easy way to get updated RPMs from https://github.com/evilsocket/opensnitch/releases
+  # Audio and other tweaks
+  - echo -e '@audio - rtprio 90\n@audio - memlock unlimited' | sudo tee -a /etc/security/limits.d/audio.conf
+  - echo 'fs.inotify.max_user_watches=600000' | sudo tee -a /etc/sysctl.conf
+  - sudo nmcli connection modify "Wired connection 1" 802-3-ethernet.wake-on-lan magic
+  - sudo nmcli connection modify "Wired connection 2" 802-3-ethernet.wake-on-lan magic
+
+groups:
+  docker: ${USER}
+  dialout: ${USER}
+  audio: ${USER}
+  video: ${USER}

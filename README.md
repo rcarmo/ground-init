@@ -13,10 +13,11 @@ The name is a pun on [`cloud-init`](https://cloud-init.io/) (which I use for eve
 ## Usage
 
 ```bash
-python ground-init.py [-h] [--steps STEPS [STEPS ...]] filename
+python3 ground-init.py [target [target]]
 ```
-You can execute each step in the `YAML` file independently if you want, or the script will blindly go through them all. Sane ordering isn't implemented (yet) because Python 3.10 and later have ordered dictionaries, so the ordering in the file works for me (but I intend to enforce some restrictions).
 
-## Sample File
+You can execute each target in the `YAML` file independently if you want, or the script will blindly go through them all. Sane ordering isn't implemented (yet) because Python 3.10 and later have ordered dictionaries, so the ordering in the file works for me (but I intend to enforce some restrictions).
 
-The current sample is the baseline install I do on a blank Fedora 37 machine. Editing this for other Linux distributions (or for macOS) should be trivial to do, and is left as an exercise to the reader.
+## Sample Files
+
+The current samples include the baseline install I do on a blank Fedora 37 machine, the deployment of my [Piku PaaS](https://github.com/piku) (which is almost exactly the same file I use for `cloud-init` bootstrapping of VM instances) and configuration of Bluetooth PAN on Debian. Editing these for other Linux distributions (or for macOS) should be trivial and is left as an exercise to the reader.
