@@ -29,7 +29,7 @@ write_files:
       ExecStartPost=bt-adapter --set Discoverable 1
       Type=simple
       [Install]
-      WantedBy=multi-user.target
+      WantedBy=network.target
 
   - path: /etc/systemd/network/pan0.netdev
     content: |
@@ -41,6 +41,10 @@ write_files:
     content: |
       [Match]
       Name=pan0
+
+      [Network]
+      Address=172.20.1.1/24
+      DHCPServer=yes
 
 runcmd:
   # Adjust to taste
