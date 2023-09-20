@@ -1,0 +1,28 @@
+#cloud-config
+
+# Sets up the Ethernet gadget on a Raspberry Pi with OTG
+
+# Since write_files' append may have trouble with the /boot partition
+# and is best suited to appending rather than modifying files
+# Manually add the following to /boot/cmdline.txt after "rootwait"
+# modules-load=dwc2,g_ether
+# and append the following to /boot/config.txt 
+## Enable Ethernet gadget
+# dtoverlay=dwc2
+
+write_files:
+
+  - path: /etc/systemd/network/usb0.network
+    content: |
+      [Match]
+      Name=usb0
+
+      [Network]
+      Address=172.21.1.1/24
+      DHCPServer=yes
+
+    path: /etc/modprobe.d/g_ether.conf
+    content: |
+      # this may be required for older USB hosts
+      #options g_ether use_eem=0
+
