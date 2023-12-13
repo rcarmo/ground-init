@@ -1,0 +1,59 @@
+#cloud-config
+
+# This file is meant to set up Proxmox VE 8.x on barebones Debian 12 
+# (or tweak an existing Proxmox VE 8.x CE install according to my typical needs)
+
+write_files:
+  - path: /etc/apt/sources.list
+    content: |
+      deb http://ftp.pt.debian.org/debian bookworm main contrib non-free non-free-firmware
+      deb http://ftp.pt.debian.org/debian bookworm-updates main contrib non-free non-free-firmware
+      # security updates
+      deb http://security.debian.org bookworm-security main contrib non-free non-free-firmware
+
+  - path: /etc/apt/sources.list.d/pve-no-subscription.list
+    content: |
+      deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription
+
+  - path: /etc/modprobe.d/i915.conf 
+    content: |
+      options i915 enable_guc=3
+     
+  # Ensure we have inotify working (some of my apps require it)
+  - path: /etc/sysctl.conf
+    append: true
+    content: |
+        fs.inotify.max_user_watches=1048576
+        
+
+package_upgrade: true
+
+packages:
+  - ntp
+  - tmux
+  - htop
+  - vim
+  - curl
+  - wget
+  - sudo
+  - fuse-overlayfs
+  - avahi-daemon
+  - openssh-server
+  - net-tools
+  - intel-media-va-driver-non-free
+  - linux-firmware
+  - vainfo
+  - lm-sensors
+  - lshw
+  - proxmox-ve
+
+runcmd:
+  # Adjust to taste
+  - timedatectl set-timezone Europe/Lisbon
+  # this should be run prior to package_upgrade, ideally
+  - wget http://download.proxmox.com/debian/proxmox-release-bookworm.gpg -O /etc/apt/trusted.gpg.d/proxmox-ve-release-bookworm.gpg
+  - chmod +r /etc/apt/trusted.gpg.d/proxmox-ve-release-bookworm.gpg
+  # Basic hygiene in case there are any outstanding dependency changes
+  - apt-get update -y
+  - apt-get dist-upgrade -y
+  - apt-get autoremove -y
