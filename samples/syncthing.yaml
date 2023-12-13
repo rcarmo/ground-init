@@ -1,0 +1,37 @@
+#cloud-config
+
+# This file is meant to set up syncthing and tailscale on a bare Debian 12 LXC )
+
+package_upgrade: true
+
+packages:
+  - ntp
+  - tmux
+  - htop
+  - vim
+  - curl
+  - wget
+  - sudo
+  - mc
+  - silversearcher-ag
+  - avahi-daemon
+  - openssh-server
+  - net-tools
+  - lm-sensors
+  - lshw
+  - syncthing
+  # for enabling systemd
+  - dbus-user-session
+  
+runcmd:
+  # Adjust to taste
+  - timedatectl set-timezone Europe/Lisbon
+  # Install tailscale
+  - curl -fsSL https://pkgs.tailscale.com/stable/debian/bookworm.noarmor.gpg | tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
+  - curl -fsSL https://pkgs.tailscale.com/stable/debian/bookworm.tailscale-keyring.list | tee /etc/apt/sources.list.d/tailscale.list
+  - apt update
+  - apt install -y tailscale
+  # set "me" to the username that has to run syncthing
+  - loginctl enable-linger me
+  - su --login -c "XDG_RUNTIME_DIR=/run/user/`id -u` systemctl --user enable syncthing.service" me
+  - su --login -c "XDG_RUNTIME_DIR=/run/user/`id -u` systemctl --user start syncthing.service" me
