@@ -3,6 +3,10 @@
 # This file is meant to set up Proxmox VE 8.x on barebones Debian 12 
 # (or tweak an existing Proxmox VE 8.x CE install according to my typical needs)
 
+# this may require multiple invocations to run specific steps in the right order
+
+# *** MAKE SURE TO EDIT THE NETWORK CONFIGURATION FOR YOUR SYSTEM ***
+
 write_files:
   - path: /etc/apt/sources.list
     content: |
@@ -24,7 +28,40 @@ write_files:
     append: true
     content: |
         fs.inotify.max_user_watches=1048576
+
+  - path: /etc/hosts
+    content: |
+        127.0.0.1 localhost.localdomain localhost
+        192.168.1.13 pve.local pve.lan pve
+
+        # The following lines are desirable for IPv6 capable hosts
         
+        ::1     ip6-localhost ip6-loopback
+        fe00::0 ip6-localnet
+        ff00::0 ip6-mcastprefix
+        ff02::1 ip6-allnodes
+        ff02::2 ip6-allrouters
+        ff02::3 ip6-allhosts
+
+  - path: /etc/resolv.conf 
+    content: |
+        search lan
+        nameserver 192.168.1.1
+        
+  - path: /etc/network/interfaces
+    content: |
+        auto lo
+        iface lo inet loopback
+
+        iface enp1s0 inet manual
+
+        auto vmbr0
+        iface vmbr0 inet static
+        	address 192.168.1.13/24
+        	gateway 192.168.1.1
+        	bridge-ports enp1s0
+        	bridge-stp off
+        	bridge-fd 0
 
 package_upgrade: true
 
@@ -41,10 +78,10 @@ packages:
   - openssh-server
   - net-tools
   - intel-media-va-driver-non-free
-  - linux-firmware
   - vainfo
   - lm-sensors
   - lshw
+  # note that pve-manager install will fail if the hosts file doesn't conform
   - proxmox-ve
 
 runcmd:
@@ -53,6 +90,9 @@ runcmd:
   # this should be run prior to package_upgrade, ideally
   - wget http://download.proxmox.com/debian/proxmox-release-bookworm.gpg -O /etc/apt/trusted.gpg.d/proxmox-ve-release-bookworm.gpg
   - chmod +r /etc/apt/trusted.gpg.d/proxmox-ve-release-bookworm.gpg
+  - rm /etc/apt/sources.list.d/pve-enterprise.list
+  # Remove subscription nagging for Community Edition
+  - sed -Ezi.bak "s/(Ext.Msg.show\(\{\s+title: gettext\('No valid sub)/void\(\{ \/\/\1/g" /usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js && systemctl restart pveproxy.service
   # Basic hygiene in case there are any outstanding dependency changes
   - apt-get update -y
   - apt-get dist-upgrade -y

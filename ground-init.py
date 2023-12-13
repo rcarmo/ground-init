@@ -209,7 +209,7 @@ def main(args: Namespace) -> None:
 
 if __name__ == "__main__":
     p = ArgumentParser("Ground-init provisioning script")
-    p.add_argument("--steps", type=str, nargs="+", help="list of steps to execute")
     p.add_argument("filename", type=str, help="YAML file")
+    p.add_argument("--steps", type=str, nargs="+", help="list of steps to execute")
     args = p.parse_args()
     main(args)
