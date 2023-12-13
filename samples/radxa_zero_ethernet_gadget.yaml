@@ -1,0 +1,44 @@
+#cloud-config
+
+# Sets up the Ethernet gadget on a Radza Zero
+
+write_files:
+
+  - path: /usr/local/sbin/radxa-usb-gadget.sh
+    content: |
+      #!/bin/sh
+      modprobe libcomposite
+      mkdir -p /sys/kernel/config/usb_gadget/radxa/
+      cd /sys/kernel/config/usb_gadget/radxa/
+      echo 0x1d6b > ./idVendor
+      echo 0x104 > ./idProduct
+      mkdir -p ./strings/0x409
+      echo "Radxa" > ./strings/0x409/manufacturer
+      echo "ECM" > ./strings/0x409/product
+      mkdir -p ./configs/r.1
+      mkdir -p ./functions/ecm.usb0
+      ln -s ./functions/ecm.usb0/ ./configs/r.1/
+      echo ff400000.usb > ./UDC
+
+  - path: /etc/systemd/system/radxa-usb-gadget.service
+    content: |
+      [Unit]
+      Description=Radxa USB Gadget
+      [Service]
+      ExecStart=/bin/sh /usr/local/sbin/radxa-usb-gadget.sh
+      Type=simple
+      [Install]
+      WantedBy=network.target
+
+  - path: /etc/systemd/network/usb0.network
+    content: |
+      [Match]
+      Name=usb0
+
+      [Network]
+      Address=172.21.1.1/24
+      DHCPServer=yes
+
+runcmd:
+  - systemctl enable radxa-usb-gadget
+  - systemctl start radxa-usb-gadget
