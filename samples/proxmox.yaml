@@ -7,6 +7,11 @@
 
 # *** MAKE SURE TO EDIT THE NETWORK CONFIGURATION FOR YOUR SYSTEM ***
 
+# Note: storage management assumes you have an LVM VG "pve" with a "data" volume
+# To create local-lvm manually and make it a thin pool, you need to do something like:
+# lvcreate -l 99%VG -n data pve # leaves 1% for LVM-Thin metadata storage
+# lvconvert --type thin-pool pve/data
+
 write_files:
   - path: /etc/apt/sources.list
     content: |
