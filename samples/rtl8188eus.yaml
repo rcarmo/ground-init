@@ -1,0 +1,32 @@
+#cloud-config
+
+# Sets up a USB Realtek Wireless NIC on a Raspberry Pi with kernel 6.1
+
+package_upgrade: true
+
+packages:
+  # should be installed already
+  - realtek-firmware
+
+write_files:
+  - path: /etc/network/interfaces.d/wlan0 
+    content: |
+      auto wlan0
+      allow-hotplug wlan0
+      iface wlan0 inet manual
+      wpa-roam /etc/wpa_supplicant/wpa_supplicant.conf
+      
+  - path: /etc/wpa_supplicant/wpa_supplicant.conf 
+    content: |
+      ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+      update_config=1
+      network={
+        ssid="SSID"
+        psk="Password"
+      }
+
+runcmd:
+  # Bus 001 Device 004: ID 0bda:8179 Realtek Semiconductor Corp. RTL8188EUS 802.11n Wireless Network Adapter
+  - lsusb | grep RTL8188
+  # just to make sure it's available
+  - modprobe r8188eu
