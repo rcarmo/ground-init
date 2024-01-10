@@ -1,0 +1,33 @@
+#cloud-config
+
+# WIP OnnxStream setup
+
+---
+packages:
+  - cmake
+  - git-lfs
+
+build:
+  root: ${HOME}/Build
+  repositories:
+    - url: https://github.com/google/XNNPACK
+      commands:
+        - git checkout $(git rev-list -n 1 --before="2023-06-27 00:00" master)
+          #1004acaa3a5c0f515a3f7b229aef1dabe31472a4
+        - mkdir build
+        - cd build; cmake -DXNNPACK_BUILD_TESTS=OFF -DXNNPACK_BUILD_BENCHMARKS=OFF ..
+        - cd build; cmake --build . --config Release
+    - url: https://github.com/vitoplantamura/OnnxStream
+      commands:
+        - cd src; mkdir build
+        - cd src/build; cmake -DMAX_SPEED=ON -DXNNPACK_DIR=${HOME}/Build/XNNPACK ..
+        - cd src/build; cmake --build . --config Release
+    - url: https://huggingface.co/AeroX2/stable-diffusion-xl-turbo-1.0-onnxstream
+      lfs: true
+      depth: 1
+    - url: https://huggingface.co/vitoplantamura/stable-diffusion-xl-base-1.0-onnxstream
+      lfs: true
+      depth: 1
+      
+
+

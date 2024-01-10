@@ -177,15 +177,23 @@ def on_build(context: list) -> None:
     repos = context.get("repositories", [])
     for repo in repos:
         url = repo.get("url", "")
+        depth = repo.get("depth", None)
         checkout_path = join(path, basename(url))
         try:
             if url:
+                lfs = repo.get("lfs", False)
+                if lfs:
+                    run(f"git lfs install", check=True, shell=True, cwd=path)
                 if exists(checkout_path):
                     log.info(f"Updating {url}")
                     run(f"git pull", check=True, shell=True, cwd=checkout_path)
                 else:
-                    log.info(f"Cloning {url}")
-                    run(f"git clone {repo['url']}", check=True, shell=True, cwd=path)
+                    if depth:
+                        log.info(f"Cloning {url} with depth {depth}")
+                        run(f"git clone --depth={depth} {repo['url']}", check=True, shell=True, cwd=path)
+                    else:
+                        log.info(f"Cloning {url}")
+                        run(f"git clone {repo['url']}", check=True, shell=True, cwd=path)
                 commands = repo.get("commands", [])
                 for item in commands:
                     log.info(item)
