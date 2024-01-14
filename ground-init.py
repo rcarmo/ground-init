@@ -68,6 +68,16 @@ def on_flatpak(context: dict) -> None:
         run(f"flatpak install -y {app}", check=True, shell=True)
 
 
+def on_ppa(context: list) -> None:
+    """PPA repositores
+
+    Args:
+        context (list): list of COPR repos to enable
+    """
+    for name in context:
+        run(f"sudo apt-add-repository -y {name}", check=True, shell=True)
+
+
 def on_copr(context: list) -> None:
     """COPR repositores
 

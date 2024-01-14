@@ -1,0 +1,34 @@
+---
+ppa:
+  - ppa:mozillateam/ppa
+
+files:
+  - path: /etc/apt/preferences.d/mozilla-firefox
+    content: |
+      Package: *
+      Pin: release o=LP-PPA-mozillateam
+      Pin-Priority: 1001
+  - path: /etc/apt/apt.conf.d/51unattended-upgrades-firefox
+    content: |
+      Unattended-Upgrade::Allowed-Origins:: "LP-PPA-mozillateam:${distro_codename}";
+
+package_upgrade: true
+packages:
+  - avahi-daemon
+  - firefox
+  - fonts-firacode
+  - fonts-inter
+  - fonts-liberation
+  - git
+  - gedit
+  - htop
+  - openssh-server
+  - python3-pip
+  - thunar
+  - tmux
+  - ttf-mscorefonts-installer
+  - vim
+  - xfce4-session
+  - xrdp
+  - zsh
+
