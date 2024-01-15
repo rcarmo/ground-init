@@ -170,7 +170,7 @@ def on_write_files(context: list) -> None:
             with open(file["path"], mode) as h:
                 h.write(file["content"])
             if file.get("permissions", None):
-                chmod(file, num(file["permissions"], 8))
+                chmod(file, int(file["permissions"], 8))
         except Exception as e:
             log.error(e)
             exit(-1)
