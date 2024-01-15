@@ -14,7 +14,7 @@ from logging import (
 )
 from argparse import ArgumentParser, Namespace
 from platform import freedesktop_os_release
-from os import chdir, environ, makedirs
+from os import chdir, chmod, environ, makedirs
 from os.path import exists, expandvars, join, basename, dirname
 from re import compile
 from subprocess import run, CalledProcessError
@@ -169,6 +169,8 @@ def on_write_files(context: list) -> None:
                 mode = "w"
             with open(file["path"], mode) as h:
                 h.write(file["content"])
+            if file.get("permissions", None):
+                chmod(file, num(file["permissions"], 8))
         except Exception as e:
             log.error(e)
             exit(-1)
