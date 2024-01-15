@@ -1,0 +1,150 @@
+#cloud-config
+
+# This file is meant to set up a NUT server on Debian/Ubuntu
+
+# *** MAKE SURE TO EDIT THE CONFIGURATION FOR YOUR SYSTEM ***
+
+packages:
+  - nut
+
+write_files:
+  - path: /etc/nut/nut.conf
+    # Reference: nut.conf(5)
+    content: |
+      MODE=netserver
+
+  - path: /etc/nut/ups.conf
+    # Reference: ups.conf(5) and usbhid-ups(5)
+    content: |
+      pollinterval=15
+      maxretry=3
+      offdelay=120
+      ondelay=240
+      [apc]
+      # This should be updated to match the output of nut-scanner and lsusb
+      driver=usbhid-ups
+      port=auto
+      desc="Back-UPS ES 550G FW:870.O4 .I USB FW:O4"
+      vendorid=051d
+      productid=0002
+      serial=5B1646T44041
+
+  - path: /etc/nut/upsd.conf
+    # Reference: upsd.conf(5)
+    content: |
+      LISTEN 0.0.0.0 3493
+      LISTEN :: 3493
+
+  - path: /etc/nut/upsd.users
+    # Reference: upsd.users(5)
+    content: |
+      [upsadmin]
+      # Administrative user - change this
+      password = upspassword
+      # Allow changing values
+      actions = SET
+      # Allow setting "Forced Shutdown"
+      actions = FSD
+      # Allow instant commands
+      instcmds = ALL
+
+      [upsuser]
+      # Normal user
+      password = password
+      upsmon slave
+
+  - path: /etc/nut/upsmon.conf
+    # Reference: upsmon.conf(5)
+    content: |
+      RUN_AS_USER root
+      MONITOR apc@localhost 1 upsadmin upspassword master
+      
+      MINSUPPLIES 1
+      SHUTDOWNCMD "/sbin/shutdown -h"
+      NOTIFYCMD /usr/sbin/upssched
+      POLLFREQ 4
+      POLLFREQALERT 2
+      HOSTSYNC 15
+      DEADTIME 24
+      MAXAGE 24
+      POWERDOWNFLAG /etc/killpower
+      
+      NOTIFYMSG ONLINE "UPS %s on line power"
+      NOTIFYMSG ONBATT "UPS %s on battery"
+      NOTIFYMSG LOWBATT "UPS %s battary is low"
+      NOTIFYMSG FSD "UPS %s: forced shutdown in progress"
+      NOTIFYMSG COMMOK "Communications with UPS %s established"
+      NOTIFYMSG COMMBAD "Communications with UPS %s lost"
+      NOTIFYMSG SHUTDOWN "Auto logout and shutdown proceeding"
+      NOTIFYMSG REPLBATT "UPS %s battery needs to be replaced"
+      NOTIFYMSG NOCOMM "UPS %s is unavailable"
+      NOTIFYMSG NOPARENT "upsmon parent process died - shutdown impossible"
+      
+      NOTIFYFLAG ONLINE   SYSLOG+WALL+EXEC
+      NOTIFYFLAG ONBATT   SYSLOG+WALL+EXEC
+      NOTIFYFLAG LOWBATT  SYSLOG+WALL+EXEC
+      NOTIFYFLAG FSD      SYSLOG+WALL+EXEC
+      NOTIFYFLAG COMMOK   SYSLOG+WALL+EXEC
+      NOTIFYFLAG COMMBAD  SYSLOG+WALL+EXEC
+      NOTIFYFLAG SHUTDOWN SYSLOG+WALL+EXEC
+      NOTIFYFLAG REPLBATT SYSLOG+WALL
+      NOTIFYFLAG NOCOMM   SYSLOG+WALL+EXEC
+      NOTIFYFLAG NOPARENT SYSLOG+WALL
+      
+      RBWARNTIME 43200
+      NOCOMMWARNTIME 600
+      
+      FINALDELAY 5
+
+  - path: /etc/nut/upssched.conf
+    # Reference: upssched.conf(5)
+    content: |
+      CMDSCRIPT /etc/nut/upssched-cmd
+      PIPEFN /etc/nut/upssched.pipe
+      LOCKFN /etc/nut/upssched.lock
+      
+      AT ONBATT * START-TIMER onbatt 30
+      AT ONLINE * CANCEL-TIMER onbatt online
+      AT LOWBATT * EXECUTE onbatt
+      AT COMMBAD * START-TIMER commbad 30
+      AT COMMOK * CANCEL-TIMER commbad commok
+      AT NOCOMM * EXECUTE commbad
+      AT SHUTDOWN * EXECUTE powerdown
+      AT SHUTDOWN * EXECUTE powerdown
+
+
+  - path: /etc/nut/upssched-cmd
+    # Reference: upssched.conf(5)
+    permissions: "0755"
+    content: |
+      #!/bin/sh
+       case $1 in
+             onbatt)
+                logger -t upssched-cmd "UPS running on battery"
+                ;;
+             #earlyshutdown)
+             #   logger -t upssched-cmd "UPS on battery too long, early shutdown"
+             #   /usr/sbin/upsmon -c fsd
+             #   ;;
+             shutdowncritical)
+                logger -t upssched-cmd "UPS on battery critical, forced shutdown"
+                /usr/sbin/upsmon -c fsd
+                ;;
+             upsgone)
+                logger -t upssched-cmd "UPS has been gone too long, can't reach"
+                ;;
+             *)
+                logger -t upssched-cmd "Unrecognized command: $1"
+                ;;
+       esac
+
+runcmd:
+  - service nut-server restart
+  - service nut-client restart
+  - systemctl restart nut-monitor
+  - upsdrvctl stop
+  - upsdrvctl start
+  - upsc apc@localhost
+  # Recommended settings 
+  # - upsrw -s battery.runtime.low=600 apc@localhost 
+  # - upsrw -s battery.charge.low=50 apc@localhost
