@@ -1,0 +1,38 @@
+#cloud-config
+
+# This file is meant to set up a NUT server on Debian/Ubuntu
+
+# *** MAKE SURE TO EDIT THE CONFIGURATION FOR YOUR SYSTEM ***
+
+packages:
+  - apcupsd
+  - apcupsd-cgi
+  - apache2
+
+write_files:
+  - path: /etc/apcupsd/apcupsd.conf
+    append: true
+    content: |
+      DEVICE
+      UPSNAME Back-UPS ES 550G
+      POLLTIME 15
+      NISIP 0.0.0.0
+      BATTERYLEVEL 30
+      MINUTES 10
+  - path: /var/www/html/index.html
+    content: | 
+      <html>
+      <head><title>Proxmox UPS</title></head>
+      <body>
+      <h3>UPS Status</h3><br>
+      <a href="/cgi-bin/apcupsd/multimon.cgi">apcupsd MultiMon</a><br>
+      <a href="/cgi-bin/apcupsd/upsstats.cgi">apcupsd Stats</a><br>
+      <a href="/cgi-bin/apcupsd/upsfstats.cgi"> apcupsd fStats</a>
+      </body>
+      </html>
+
+
+runcmd:
+  - a2enmod cgi
+  - systemctl restart apcupsd
+  - systemctl restart apache2

@@ -8,6 +8,11 @@ packages:
   - nut
 
 write_files:
+  - path: /etc/udev/rules.d/63-nut-usbups.rules
+    content: |
+      # Bus 001 Device 003: ID 051d:0002 American Power Conversion Uninterruptible Power Supply
+      ATTR{idVendor}=="051d", ATTR{idProduct}=="0002", MODE="664", GROUP="nut"
+
   - path: /etc/nut/nut.conf
     # Reference: nut.conf(5)
     content: |
@@ -27,7 +32,6 @@ write_files:
       desc="Back-UPS ES 550G FW:870.O4 .I USB FW:O4"
       vendorid=051d
       productid=0002
-      serial=5B1646T44041
 
   - path: /etc/nut/upsd.conf
     # Reference: upsd.conf(5)
@@ -141,10 +145,11 @@ write_files:
 runcmd:
   - service nut-server restart
   - service nut-client restart
+  - systemctl enable nut-monitor
   - systemctl restart nut-monitor
   - upsdrvctl stop
   - upsdrvctl start
-  - upsc apc@localhost
+  #- upsc apc@localhost
   # Recommended settings 
   # - upsrw -s battery.runtime.low=600 apc@localhost 
   # - upsrw -s battery.charge.low=50 apc@localhost
