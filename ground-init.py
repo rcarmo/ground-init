@@ -72,7 +72,7 @@ def on_ppa(context: list) -> None:
     """PPA repositores
 
     Args:
-        context (list): list of COPR repos to enable
+        context (list): list of PPA repos to enable
     """
     for name in context:
         run(f"sudo apt-add-repository -y {name}", check=True, shell=True)
