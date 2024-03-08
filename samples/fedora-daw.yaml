@@ -30,6 +30,7 @@ packages:
   - git
   - golang
   - htop
+  - btop
   - lm_sensors
   - python3-pip
   - remmina

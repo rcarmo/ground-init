@@ -8,6 +8,7 @@ packages:
   - ntp
   - tmux
   - htop
+  - btop
   - vim
   - fail2ban
   - curl
