@@ -26,3 +26,10 @@ write_files:
       # this may be required for older USB hosts
       #options g_ether use_eem=0
 
+run_cmd:
+
+  # Depending on your Raspbian version, you may need to explicitly enable systemd-networkd and remove NetworkManager
+  # (this is required for Bookworm at least)
+  - systemctl disable NetworkManager
+  - systemctl enable systemd-networkd
+
