@@ -12,6 +12,13 @@
 
 write_files:
 
+  - path: /etc/network/interfaces.d/usb0
+    content: |
+      allow-hotplug usb0
+      auto usb0
+      iface usb0 inet auto
+      iface usb0 inet6 auto
+
   - path: /etc/systemd/network/usb0.network
     content: |
       [Match]
