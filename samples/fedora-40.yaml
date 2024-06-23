@@ -52,8 +52,13 @@ packages:
   - gimp
   - libheif-tools
   - heif-pixbuf-loader
-  # Video hardware acceleration
+  # Video hardware acceleration - see https://fedoraproject.org/wiki/Firefox_Hardware_acceleration
   - ffmpeg-free
+  # AMD
+  # - libavcodec-freeworld
+  # - mesa-va-drivers-freeworld
+  # Intel
+  # - intel-media-driver 
   - igt-gpu-tools
   - libva-utils
   # Windows
