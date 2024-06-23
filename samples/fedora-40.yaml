@@ -58,6 +58,7 @@ packages:
   # - libavcodec-freeworld
   # - mesa-va-drivers-freeworld
   # Intel
+  # - libavcodec-freeworld
   # - intel-media-driver 
   - igt-gpu-tools
   - libva-utils
