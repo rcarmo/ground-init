@@ -109,7 +109,6 @@ runcmd:
   - gext install BingWallpaper@ineffable-gmail.com
   - gext install tailscale-status@maxgallup.github.com
   - gext install Vitals@CoreCoding.com
-  - gext install freon@UshakovVasilii_Github.yahoo.com
   - gext install tilingshell@ferrarodomenico.com
   # Tailscale
   - sudo dnf config-manager --add-repo https://pkgs.tailscale.com/stable/fedora/tailscale.repo
@@ -123,7 +122,7 @@ runcmd:
   # dotnet
   - sudo dnf config-manager --add-repo https://packages.microsoft.com/yumrepos/microsoft-fedora40-prod
   - sudo dnf install code microsoft-edge-stable
-  # For Spitfire Audio VSTs
+  # For Windows emulation
   - winetricks dxvk
   # TODO: Figure out an easy way to get updated RPMs from https://github.com/evilsocket/opensnitch/releases
   # Audio and other tweaks
