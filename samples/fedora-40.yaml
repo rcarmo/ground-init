@@ -21,6 +21,7 @@ packages:
   - golang
   - htop
   - btop
+  - mosh
   - lm_sensors
   - python3-pip
   - remmina
