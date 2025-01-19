@@ -37,7 +37,7 @@ packages:
   - libsasl2-dev
   - libldap2-dev
   # Clojure (will bring in OpenJDK 11)
-  - leiningen
+  #- leiningen
   # Piku stack, plus helpers
   - git
   - certbot
