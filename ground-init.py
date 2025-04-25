@@ -9,16 +9,15 @@ from logging import (
     CRITICAL,
     basicConfig,
     getLogger,
-    Formatter,
-    StreamHandler,
 )
 from argparse import ArgumentParser, Namespace
-from platform import freedesktop_os_release
+from platform import system, freedesktop_os_release
 from os import chdir, chmod, environ, makedirs
 from os.path import exists, expandvars, join, basename, dirname
 from re import compile
 from subprocess import run, CalledProcessError
 from sys import argv
+from shutil import which
 
 from yaml import SafeLoader, load
 
@@ -88,20 +87,58 @@ def on_copr(context: list) -> None:
         run(f"sudo dnf copr enable {name}", check=True, shell=True)
 
 
+def check_brew() -> bool:
+    """Check if Homebrew is installed"""
+    if system() != "Darwin":
+        return False  # Not macOS
+    return which("brew") is not None
+
+
+def ensure_brew() -> None:
+    """Check if Homebrew is installed and inform the user if not."""
+    if system() == "Darwin":
+        if not check_brew():
+            log.error("Homebrew not found. Please install it first from https://brew.sh/")
+            exit(-1)
+
+
 def on_packages(context: list) -> None:
     """Packages to install
 
     Args:
-        context (list): List of packages (can include URLs for dnf/apt to fetch)
+        context (list): List of packages (can include URLs for dnf/apt or cask: prefix for brew cask)
     """
-    distro = freedesktop_os_release()["ID"]
-    packages = " ".join(context)
-    if distro == "fedora":
+    os_name = system()
+    distro_info = freedesktop_os_release() if os_name != "Darwin" else {}
+    distro = distro_info.get("ID")
+
+    if os_name == "Darwin":
+        ensure_brew()
+        formulae = []
+        casks = []
+        for pkg in context:
+            if pkg.startswith("cask:"):
+                casks.append(pkg.split(":", 1)[1])
+            else:
+                formulae.append(pkg)
+
+        if formulae:
+            formulae_str = " ".join(formulae)
+            log.info(f"Installing brew formulae: {formulae_str}")
+            run(f"brew install {formulae_str}", check=True, shell=True)
+        if casks:
+            casks_str = " ".join(casks)
+            log.info(f"Installing brew casks: {casks_str}")
+            run(f"brew install --cask {casks_str}", check=True, shell=True)
+
+    elif distro == "fedora":
+        packages = " ".join(context)
         run(f"sudo dnf install -y {packages}", check=True, shell=True)
     elif distro in ["ubuntu", "debian"]:
+        packages = " ".join(context)
         run(f"sudo apt install -y {packages}", check=True, shell=True)
     else:
-        log.error(f"Cannot determine how to install packages in {distro}, exiting")
+        log.error(f"Cannot determine how to install packages in {os_name}/{distro}, exiting")
         exit(-1)
 
 
@@ -141,13 +178,21 @@ def on_package_upgrade(context: bool) -> None:
     """
     if not context:
         return
-    distro = freedesktop_os_release()["ID"]
-    if distro == "fedora":
+
+    os_name = system()
+    distro_info = freedesktop_os_release() if os_name != "Darwin" else {}
+    distro = distro_info.get("ID")
+
+    if os_name == "Darwin":
+        ensure_brew()
+        log.info("Updating and upgrading Homebrew packages...")
+        run(f"brew update && brew upgrade", check=True, shell=True)
+    elif distro == "fedora":
         run(f"sudo dnf update -y", check=True, shell=True)
     elif distro in ["ubuntu", "debian"]:
         run(f"sudo apt update && sudo apt dist-upgrade -y", check=True, shell=True)
     else:
-        log.error(f"Cannot determine how to upgrade packages in {distro}, exiting")
+        log.error(f"Cannot determine how to upgrade packages in {os_name}/{distro}, exiting")
         exit(-1)
 
 
@@ -216,6 +261,9 @@ def on_build(context: list) -> None:
 
 
 def main(args: Namespace) -> None:
+    if system() == "Darwin":
+        ensure_brew()
+
     actions = get_context(args.filename)
     steps = actions.keys()
     if args.steps:
