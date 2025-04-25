@@ -22,9 +22,9 @@ You can execute specific steps (top-level keys in the `YAML` file like `packages
 
 The [`samples`](samples) directory contains various examples for different operating systems and tasks, including:
 
-* Setting up Fedora (#fedora-40.yaml, #fedora-daw.yaml) and Debian/Ubuntu (#ubuntu-xfce-rdp.yaml, #syncthing.yaml) systems.
-* Configuring specific services like Proxmox (#proxmox.yaml), Piku PaaS (#piku.yaml), Network UPS Tools (#network-ups.yaml), or Bluetooth PAN (#btpan.yaml).
-* Building software from source (#onnxstream.yaml).
-* Setting up hardware like USB Ethernet gadgets (#ethernet_gadget.yaml, #radxa_zero_ethernet_gadget.yaml) or Wi-Fi adapters (#rtl8188eus.yaml).
+* Setting up Fedora (`fedora-40.yaml`, `fedora-daw.yaml`) and Debian/Ubuntu (`ubuntu-xfce-rdp.yaml`, `syncthing.yaml`) systems.
+* Configuring specific services like Proxmox (`proxmox.yaml`), Piku PaaS (`piku.yaml`), Network UPS Tools (`network-ups.yaml`), or Bluetooth PAN (`btpan.yaml`).
+* Building software from source (`onnxstream.yaml`).
+* Setting up hardware like USB Ethernet gadgets (`ethernet_gadget.yaml`, `radxa_zero_ethernet_gadget.yaml`) or Wi-Fi adapters (`rtl8188eus.yaml`).
 
 These can be adapted for different needs and operating systems (including macOS, using `brew` and `cask:` prefixes in the `packages` section).
