@@ -1,0 +1,132 @@
+
+# Note: The English (Macintosh) keyboard works perfectly for Mac-like accented character input
+flatpak:
+  remotes:
+    - name: flathub
+      url: https://flathub.org/repo/flathub.flatpakrepo
+
+write_files:
+  - path: ${HOME}/.backup/README.md
+    content: |
+      This is a backup directory for vim.
+
+packages:
+  - btop
+  - clang-tools-extra
+  - curl
+  - dconf-editor
+  - docker
+  - flatseal
+  - git
+  - gnome-epub-thumbnailer
+  - godot
+  - htop
+  - keepassxc
+  - lm_sensors
+  - lshw
+  - mosh
+  - neovim
+  - python3-pip
+  - remmina
+  - restic
+  - sqlite
+  - stow
+  - the_silver_searcher
+  - tmux
+  - vim
+  - zsh
+  # Graphics and video
+  - ffmpeg-free
+  - gimp
+  - heif-pixbuf-loader
+  - igt-gpu-tools
+  - libheif-tools
+  - libva-utils
+  - libva-utils
+  - openscad
+  # Networking
+  - syncthing
+  - tailscale
+  # Windows
+  - rpm-build
+  - wine
+  - winetricks
+  # Font Stack and themeing
+  - cabextract
+  - fira-code-fonts
+  - fontconfig
+  - gnome-extensions-app
+  - gnome-shell-extension-appindicator
+  - gnome-shell-extension-dash-to-dock
+  - gnome-shell-extension-user-theme
+  - gnome-tweaks
+  - liberation-fonts
+  - rsms-inter-fonts
+  - sassc
+  - xorg-x11-font-utils
+
+  # This does not work inside rpm-ostree
+  #- https://downloads.sourceforge.net/project/mscorefonts2/rpms/msttcore-fonts-installer-2.6-1.noarch.rpm
+  # so it should be installed under toolbox and the fonts copied to the local user folder:
+  # cp /usr/share/fonts/msttcore ~/.local/share/fonts
+  # fc-cache -v
+
+build:
+  root: ${HOME}/Build
+  repositories:
+    # Theme Repositories
+    - url: https://github.com/vinceliuice/WhiteSur-gtk-theme
+      commands:
+        # Change this to Dark if needed
+        - ./install.sh --shell -i simple --libadwaita --color dark
+        - sudo ./tweaks.sh --gdm -i simple --flatpak --firefox --dash-to-dock
+    - url: https://github.com/vinceliuice/WhiteSur-icon-theme
+      commands:
+        # this one errors out due to a subcommand
+        - ./install.sh || true
+    - url: https://github.com/vinceliuice/WhiteSur-kde
+      commands:
+        - ./install.sh
+    - url: https://github.com/vinceliuice/WhiteSur-cursors
+      commands:
+        - ./install.sh
+
+runcmd:
+  - gsettings set org.gnome.desktop.interface cursor-theme WhiteSur-cursors
+  - gsettings set org.gnome.desktop.interface gtk-theme WhiteSur-Light
+  - gsettings set org.gnome.desktop.interface icon-theme WhiteSur
+  - gsettings set org.gnome.desktop.interface font-antialiasing rgba
+  - gsettings set org.gnome.desktop.interface font-hinting slight
+  - gsettings set org.gnome.desktop.interface font-name 'Inter 11'
+  - gsettings set org.gnome.desktop.interface document-font-name 'Inter 11'
+  - gsettings set org.gnome.desktop.interface monospace-font-name 'Fira Code 10'
+  - gsettings set org.gnome.desktop.wm.preferences titlebar-font 'Inter Bold 11'
+  - gsettings set org.gnome.desktop.wm.preferences button-layout 'close,minimize,maximize:appmenu'
+  - xdg-desktop-menu forceupdate
+  - fc-cache ${HOME}/.local/share/fonts
+  - pip3 install --upgrade gnome-extensions-cli
+  # these will only work when PATH includes ~/.local/bin
+  - gext install appindicatorsupport@rgcjonas.gmail.com
+  - gext install syncthing@gnome.2nv2u.com
+  - gext install notification-banner-reloaded@marcinjakubowski.github.com
+  - gext install quick-settings-tweaks@qwreey
+  - gext install BingWallpaper@ineffable-gmail.com
+  - gext install tailscale@joaophi.github.com
+  - gext install Vitals@CoreCoding.com
+  - gext install tilingshell@ferrarodomenico.com
+  # Syncthing
+  - systemctl enable --user --now syncthing
+  - echo 'fs.inotify.max_user_watches=600000' | sudo tee -a /etc/sysctl.conf
+  # Tailscale
+  - sudo systemctl enable --now tailscaled
+  - sudo tailscale set --operator=${USER}
+  # WINE
+  - winetricks dxvk
+  # Starship (TODO: install via linuxbrew
+  # curl -sS https://starship.rs/install.sh | sh
+
+groups:
+  docker: ${USER}
+  dialout: ${USER}
+  audio: ${USER}
+  video: ${USER}
