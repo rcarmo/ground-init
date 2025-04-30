@@ -19,7 +19,6 @@ packages:
   - flatseal
   - git
   - gnome-epub-thumbnailer
-  - godot
   - htop
   - keepassxc
   - lm_sensors
@@ -44,6 +43,8 @@ packages:
   - libva-utils
   - libva-utils
   - openscad
+  - gnome-network-displays
+  - godot
   # Networking
   - syncthing
   - tailscale
