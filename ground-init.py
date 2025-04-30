@@ -108,6 +108,7 @@ def on_packages(context: list) -> None:
     Args:
         context (list): List of packages (can include URLs for dnf/apt or cask: prefix for brew cask)
     """
+    context = list(set(context)) # eliminate dupes
     os_name = system()
     distro_info = freedesktop_os_release() if os_name != "Darwin" else {}
     distro = distro_info.get("ID")
@@ -133,7 +134,10 @@ def on_packages(context: list) -> None:
 
     elif distro == "fedora":
         packages = " ".join(context)
-        run(f"sudo dnf install -y {packages}", check=True, shell=True)
+        if distro_info.get("OSTREE_VERSION"):
+            run(f"sudo rpm-ostree install --allow-inactive --idempotent -y {packages}", check=True, shell=True)
+        else:
+            run(f"sudo dnf install -y {packages}", check=True, shell=True)
     elif distro in ["ubuntu", "debian"]:
         packages = " ".join(context)
         run(f"sudo apt install -y {packages}", check=True, shell=True)
