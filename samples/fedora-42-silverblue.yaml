@@ -68,6 +68,7 @@ packages:
   - rsms-inter-fonts
   - sassc
   - xorg-x11-font-utils
+  - glib2-devel
 
   # This does not work inside rpm-ostree
   #- https://downloads.sourceforge.net/project/mscorefonts2/rpms/msttcore-fonts-installer-2.6-1.noarch.rpm
@@ -81,7 +82,7 @@ build:
     # Theme Repositories
     - url: https://github.com/vinceliuice/WhiteSur-gtk-theme
       commands:
-        # Change this to Dark if needed
+        - ./install.sh --shell -i simple --color dark
         - ./install.sh --shell -i simple --libadwaita --color dark
         - sudo ./tweaks.sh --gdm -i simple --flatpak --firefox --dash-to-dock
     - url: https://github.com/vinceliuice/WhiteSur-icon-theme
