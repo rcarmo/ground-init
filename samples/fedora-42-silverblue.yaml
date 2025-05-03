@@ -14,11 +14,8 @@ packages:
   - btop
   - clang-tools-extra
   - curl
-  - dconf-editor
   - docker
-  - flatseal
   - git
-  - gnome-epub-thumbnailer
   - htop
   - keepassxc
   - lm_sensors
@@ -34,6 +31,11 @@ packages:
   - tmux
   - vim
   - zsh
+  # Desktop
+  - geary
+  - gnome-epub-thumbnailer
+  - dconf-editor
+  - flatseal
   # Graphics and video
   - ffmpeg-free
   - gimp
@@ -116,6 +118,7 @@ runcmd:
   - gext install tailscale@joaophi.github.com
   - gext install Vitals@CoreCoding.com
   - gext install tilingshell@ferrarodomenico.com
+  - gext install task-widget@juozasmiskinis.gitlab.io
   # Syncthing
   - systemctl enable --user --now syncthing
   - echo 'fs.inotify.max_user_watches=600000' | sudo tee -a /etc/sysctl.conf
