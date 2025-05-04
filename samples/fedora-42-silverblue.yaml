@@ -141,10 +141,10 @@ runcmd:
   # curl -sS https://starship.rs/install.sh | sh
   # video overrides
   - sudo rpm-ostree install https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
-  - sudo rpm-ostree update --uninstall $(rpm -q rpmfusion-free-release) --uninstall $(rpm -q rpmfusion-nonfree-release) --install rpmfusion-free-release --install rpmfusion-nonfree-release
-
-  - sudo rpm-ostree override remove noopenh264 --install openh264 --install gstreamer1-plugin-openh264 --install mozilla-openh264
-  - sudo rpm-ostree override remove mesa-va-drivers libavcodec-free libavfilter-free libavformat-free libavutil-free libpostproc-free libswresample-free libswscale-free --install ffmpeg --install mesa-va-drivers-freeworld
+  # NEED TO REBOOT AFTER THE ABOVE AND THEN DO THESE MANUALLY
+  #- sudo rpm-ostree update --uninstall $(rpm -q rpmfusion-free-release) --uninstall $(rpm -q rpmfusion-nonfree-release) --install rpmfusion-free-release --install rpmfusion-nonfree-release
+  #- sudo rpm-ostree override remove noopenh264 --install openh264 --install gstreamer1-plugin-openh264 --install mozilla-openh264
+  #- sudo rpm-ostree override remove mesa-va-drivers libavcodec-free libavfilter-free libavformat-free libavutil-free libpostproc-free libswresample-free libswscale-free --install ffmpeg --install mesa-va-drivers-freeworld
 
 groups:
   docker: ${USER}
