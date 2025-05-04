@@ -45,12 +45,14 @@ packages:
   - gimp
   - gnome-network-displays
   - godot
+  - mozilla-openh264
   - gstreamer1-plugin-openh264
   - gstreamer1-vaapi
   - heif-pixbuf-loader
   - igt-gpu-tools
   - libheif-tools
   - libva-utils
+  - nvtop
   - openscad
   # Networking
   - arp-scan
@@ -137,6 +139,9 @@ runcmd:
   - winetricks dxvk
   # Starship (TODO: install via linuxbrew
   # curl -sS https://starship.rs/install.sh | sh
+  # video overrides
+  - sudo rpm-ostree override remove noopenh264 --install openh264 --install gstreamer1-plugin-openh264 --install mozilla-openh264
+  - sudo rpm-ostree override remove mesa-va-drivers libavcodec-free libavfilter-free libavformat-free libavutil-free libpostproc-free libswresample-free libswscale-free --install ffmpeg --install mesa-va-drivers-freeworld
 
 groups:
   docker: ${USER}
