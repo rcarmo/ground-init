@@ -33,6 +33,7 @@ packages:
   - zsh
   # Desktop
   - geary
+  - evolution-ews
   - gnome-epub-thumbnailer
   - dconf-editor
   - flatseal
@@ -120,6 +121,7 @@ runcmd:
   - gext install Vitals@CoreCoding.com
   - gext install tilingshell@ferrarodomenico.com
   - gext install task-widget@juozasmiskinis.gitlab.io
+  - gext install just-perfection-desktop@just-perfection
   # Syncthing
   - systemctl enable --user --now syncthing
   - echo 'fs.inotify.max_user_watches=600000' | sudo tee -a /etc/sysctl.conf
