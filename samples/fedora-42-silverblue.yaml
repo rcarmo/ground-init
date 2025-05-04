@@ -38,6 +38,8 @@ packages:
   - dconf-editor
   - flatseal
   - syncthing
+  - remmina
+  - remmina-plugin-rdp
   # Graphics and video
   - ffmpeg-free
   - gimp
