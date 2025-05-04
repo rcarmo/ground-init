@@ -37,6 +37,7 @@ packages:
   - gnome-epub-thumbnailer
   - dconf-editor
   - flatseal
+  - syncthing
   # Graphics and video
   - ffmpeg-free
   - gimp
@@ -50,7 +51,9 @@ packages:
   - libva-utils
   - openscad
   # Networking
-  - syncthing
+  - arp-scan
+  - arptools
+  - net-tools
   - tailscale
   # Windows
   - rpm-build
