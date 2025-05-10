@@ -1,5 +1,5 @@
 
-# Note: The English (Macintosh) keyboard works perfectly for Mac-like accented character input
+# Note: The English (Maci/easyeffectsntosh) keyboard works perfectly for Mac-like accented character input
 flatpak:
   remotes:
     - name: flathub
@@ -9,8 +9,13 @@ write_files:
   - path: ${HOME}/.backup/README.md
     content: |
       This is a backup directory for vim.
+    # for manual import into the extension
+  - path: ${HOME}/Build/tilingshell-layouts.json
+    content: |
+      [{"id":"Layout 1","tiles":[{"x":0,"y":0,"width":0.22,"height":0.5,"groups":[1,2]},{"x":0,"y":0.5,"width":0.22,"height":0.5,"groups":[1,2]},{"x":0.22,"y":0,"width":0.56,"height":1,"groups":[2,3]},{"x":0.78,"y":0,"width":0.22,"height":0.5,"groups":[3,4]},{"x":0.78,"y":0.5,"width":0.22,"height":0.5,"groups":[3,4]}]},{"id":"Layout 2","tiles":[{"x":0,"y":0,"width":0.22,"height":1,"groups":[1]},{"x":0.22,"y":0,"width":0.56,"height":1,"groups":[1,2]},{"x":0.78,"y":0,"width":0.22,"height":1,"groups":[2]}]},{"id":"Layout 3","tiles":[{"x":0,"y":0,"width":0.33,"height":1,"groups":[1]},{"x":0.33,"y":0,"width":0.67,"height":1,"groups":[1]}]},{"id":"Layout 4","tiles":[{"x":0,"y":0,"width":0.67,"height":1,"groups":[1]},{"x":0.67,"y":0,"width":0.33,"height":1,"groups":[1]}]},{"id":"2454455","tiles":[{"x":0,"y":0,"width":0.5,"height":1,"groups":[1]},{"x":0.5,"y":0,"width":0.49999999999999994,"height":1,"groups":[1]}]}]
 
 packages:
+  - atuin
   - btop
   - clang-tools-extra
   - curl
@@ -40,7 +45,8 @@ packages:
   - syncthing
   - remmina
   - remmina-plugin-rdp
-  # Graphics and video
+  # Media 
+  - easyeffects
   - ffmpeg-free
   - gimp
   - gnome-network-displays
@@ -129,6 +135,8 @@ runcmd:
   - gext install tilingshell@ferrarodomenico.com
   - gext install task-widget@juozasmiskinis.gitlab.io
   - gext install just-perfection-desktop@just-perfection
+  # Pulseaudio/easyeffects presets
+  - gext install quick-settings-tweaks@qwreey
   # Syncthing
   - systemctl enable --user --now syncthing
   - echo 'fs.inotify.max_user_watches=600000' | sudo tee -a /etc/sysctl.conf
@@ -141,10 +149,13 @@ runcmd:
   # curl -sS https://starship.rs/install.sh | sh
   # video overrides
   - sudo rpm-ostree install https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
-  # NEED TO REBOOT AFTER THE ABOVE AND THEN DO THESE MANUALLY
+  # NEED TO REBOOT AFTER THE ABOVE AND THEN DO THESE MANUALLY 
+  # - this ensures rpmfusion will be in lockstep with Fedora updates
   #- sudo rpm-ostree update --uninstall $(rpm -q rpmfusion-free-release) --uninstall $(rpm -q rpmfusion-nonfree-release) --install rpmfusion-free-release --install rpmfusion-nonfree-release
+  # install mozilla support for openh264
   #- sudo rpm-ostree override remove noopenh264 --install openh264 --install gstreamer1-plugin-openh264 --install mozilla-openh264
-  #- sudo rpm-ostree override remove mesa-va-drivers libavcodec-free libavfilter-free libavformat-free libavutil-free libpostproc-free libswresample-free libswscale-free --install ffmpeg --install mesa-va-drivers-freeworld
+  # Swap ffmpeg
+  #- rpm-ostree override remove libavcodec-free libavfilter-free libavformat-free libavutil-free libpostproc-free libswresample-free libswscale-free ffmpeg-free libavdevice-free --install ffmpeg --install mesa-va-drivers-freeworld
 
 groups:
   docker: ${USER}
