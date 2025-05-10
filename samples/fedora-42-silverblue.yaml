@@ -9,12 +9,22 @@ write_files:
   - path: ${HOME}/.backup/README.md
     content: |
       This is a backup directory for vim.
+    # Set the minimum quantum for all audio streams to remove crackling from Easyeffects
   - path: ~/.config/pipewire/pipewire.conf.d/custom-quantum.conf
     content: |
-      [main]
-      # Set the minimum quantum for all audio streams to remove crackling from Easyeffects
-      clock.min-quantum=512
-    # for manual import into the extension
+      context.properties = {
+        ## Properties for the DSP configuration.
+        #default.clock.quantum       = 1024
+        default.clock.min-quantum   = 512
+        #default.clock.max-quantum   = 2048
+        #default.clock.quantum-limit = 8192
+        #settings.check-quantum      = false
+        #
+        # These overrides are only applied when running in a vm.
+        #vm.overrides = {
+        #    default.clock.min-quantum = 1024
+        #}
+      }
   - path: ${HOME}/Build/tilingshell-layouts.json
     content: |
       [{"id":"Layout 1","tiles":[{"x":0,"y":0,"width":0.22,"height":0.5,"groups":[1,2]},{"x":0,"y":0.5,"width":0.22,"height":0.5,"groups":[1,2]},{"x":0.22,"y":0,"width":0.56,"height":1,"groups":[2,3]},{"x":0.78,"y":0,"width":0.22,"height":0.5,"groups":[3,4]},{"x":0.78,"y":0.5,"width":0.22,"height":0.5,"groups":[3,4]}]},{"id":"Layout 2","tiles":[{"x":0,"y":0,"width":0.22,"height":1,"groups":[1]},{"x":0.22,"y":0,"width":0.56,"height":1,"groups":[1,2]},{"x":0.78,"y":0,"width":0.22,"height":1,"groups":[2]}]},{"id":"Layout 3","tiles":[{"x":0,"y":0,"width":0.33,"height":1,"groups":[1]},{"x":0.33,"y":0,"width":0.67,"height":1,"groups":[1]}]},{"id":"Layout 4","tiles":[{"x":0,"y":0,"width":0.67,"height":1,"groups":[1]},{"x":0.67,"y":0,"width":0.33,"height":1,"groups":[1]}]},{"id":"2454455","tiles":[{"x":0,"y":0,"width":0.5,"height":1,"groups":[1]},{"x":0.5,"y":0,"width":0.49999999999999994,"height":1,"groups":[1]}]},{"id":"3037045","tiles":[{"x":0,"y":0,"width":0.3333333333333333,"height":1,"groups":[1]},{"x":0.3333333333333333,"y":0,"width":0.3333333333333333,"height":1,"groups":[2,1]},{"x":0.6666666666666666,"y":0,"width":0.3333333333333333,"height":1,"groups":[2]}]}]
