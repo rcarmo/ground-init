@@ -387,7 +387,6 @@ packages:
   - libheif-tools
   - libva-utils
   - nvtop
-  - openscad
   # Networking
   - arp-scan
   - arptools
