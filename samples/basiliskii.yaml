@@ -1,0 +1,60 @@
+# Setting up Basilisk II with SDL on Raspberry Pi 3
+
+package_upgrade: true
+
+packages:
+  - vim
+  - tmux
+  - htop
+  - unzip
+  - libgles2
+  - libgles-dev 
+  - libudev-dev
+  - libmpfr-dev
+  - libdbus-1-dev
+  - libbcm2835-dev
+  - libraspberrypi-dev
+
+write_files:
+  - path: /boot/firmware/config.txt
+    append: true
+    content: |
+      disable_splash=1
+      dtoverlay=disable-bt
+      boot_delay=0
+      dtoverlay=vc4-kms-v3d
+      dtoverlay=waveshare-35dpi
+      dtoverlay=waveshare-touch-35dpi
+  - path: /home/pi/.config/systemd/user/basiliskii.service
+    content: |
+      [Unit]
+      Description=BasiliskII Startup Service with OSS Sound Support
+
+      [Service]
+      Type=simple
+      # Load the oversampled OSS sound module before starting BasiliskII.
+      # Ensure your sudoers file allows you to run '/sbin/modprobe snd-pcm-oss' without a password.
+      ExecStartPre=/usr/bin/sudo /sbin/modprobe snd-pcm-oss
+      # Start BasiliskII; adjust the full path if necessary.
+      ExecStart=/usr/local/bin/BasiliskII
+      Restart=always
+
+      [Install]
+      # Launch when the user's default target (usually their graphical or multi-user session) is reached.
+      WantedBy=default.target
+
+
+runcmd:
+  - wget https://files.waveshare.com/wiki/3.5inch%20DPI%20LCD/3.5DPI-dtbo.zip
+  - unzip ./3.5DPI-dtbo.zip
+  - sudo cp 3.5DPI-dtbo/*.dtbo /boot/firmware/overlays/
+
+off:
+  - sudo systemctl disable apt-daily.service
+  - wget https://www.libsdl.org/release/SDL2-2.32.8.tar.gz
+  - tar -zxvf SDL2-2.32.8.tar.gz
+  - cd SDL2-2.32.8 && ./configure --disable-video-opengl --disable-video-x11 --disable-pulseaudio --disable-esd --disable-video-wayland && make -j4 && sudo make install
+  - cd src/Unix && NO_CONFIGURE=1 ./autogen.sh && ./configure --enable-sdl-audio --enable-sdl-framework --enable-sdl-video --disable-vosf --without-mon --without-esd --without-gtk --disable-jit-compiler --disable-nls && CPATH=$CPATH:/usr/local/include/SDL2 make -j4 && sudo make install
+  - systemctl --user daemon-reload
+  - systemctl --user enable --now basiliskii.service
+
