@@ -54,7 +54,8 @@ off:
   - wget https://www.libsdl.org/release/SDL2-2.32.8.tar.gz
   - tar -zxvf SDL2-2.32.8.tar.gz
   - cd SDL2-2.32.8 && ./configure --disable-video-opengl --disable-video-x11 --disable-pulseaudio --disable-esd --disable-video-wayland && make -j4 && sudo make install
-  - cd src/Unix && NO_CONFIGURE=1 ./autogen.sh && ./configure --enable-sdl-audio --enable-sdl-framework --enable-sdl-video --disable-vosf --without-mon --without-esd --without-gtk --disable-jit-compiler --disable-nls && CPATH=$CPATH:/usr/local/include/SDL2 make -j4 && sudo make install
+  - git clone https://github.com/kanjitalk755/macemu
+  - cd macemu/BasiliskII/src/Unix && NO_CONFIGURE=1 ./autogen.sh && ./configure --enable-sdl-audio --enable-sdl-framework --enable-sdl-video --disable-vosf --without-mon --without-esd --without-gtk --disable-jit-compiler --disable-nls && CPATH=$CPATH:/usr/local/include/SDL2 make -j4 && sudo make install
   - systemctl --user daemon-reload
   - systemctl --user enable --now basiliskii.service
 
