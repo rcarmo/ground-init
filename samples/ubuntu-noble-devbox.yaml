@@ -1,0 +1,48 @@
+---
+files:
+  - path: /etc/xrdp/startwm.sh
+    content: |
+      #!/bin/sh
+      if test -r /etc/profile; then
+        . /etc/profile
+      fi
+      if test -r ~/.profile; then
+        . ~/.profile
+      fi
+      startxfce4
+  - path: /etc/skel/.config/xfce4/helpers.rc
+      FileManager=thunar
+      WebBrowser=microsoft-edge
+      TerminalEmulator=xfce4-terminal
+
+package_upgrade: true
+packages:
+  - avahi-daemon
+  - curl
+  - fonts-firacode
+  - fonts-inter
+  - fonts-liberation
+  - git
+  - gedit
+  - htop
+  - openssh-server
+  - python3-pip
+  - thunar
+  - tmux
+  - ttf-mscorefonts-installer
+  - vim
+  - xfce4-session
+  - xfce4-terminal
+  - xfce4-panel
+  - xfwm4
+  - xrdp
+  - zsh
+
+runcmd:
+  - wget -qO- https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor > /usr/share/keyrings/docker.gpg
+  - echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  - apt update && apt install -y docker-ce docker-ce-cli containerd.io
+  - wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /usr/share/keyrings/microsoft.gpg 
+  - echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/edge stable main" | sudo tee /etc/apt/sources.list.d/microsoft-edge.list > /dev/null
+  - echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" |  sudo tee /etc/apt/sources.list.d/vscode.list > /dev/null
+  - apt update && apt install -y microsoft-edge-stable code
