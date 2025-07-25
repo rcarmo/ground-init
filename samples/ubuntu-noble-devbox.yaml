@@ -1,5 +1,12 @@
 ---
 files:
+#  - path: etc/xrp/xrdp.ini
+#    content | 
+#      tcp_nodelay=true
+#      tcp_keepalive=true
+#      tcp_send_buffer_bytes=4194304
+#      #crypt_level = low
+#      max_bpp = 16
   - path: /etc/xrdp/startwm.sh
     content: |
       #!/bin/sh
