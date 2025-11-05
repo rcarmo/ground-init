@@ -1,0 +1,149 @@
+# Setup a MacBook Air with Fedora Silverblue
+# Note: The English (Macintosh) keyboard works perfectly for Mac-like accented character input
+flatpak:
+  remotes:
+    - name: flathub
+      url: https://flathub.org/repo/flathub.flatpakrepo
+  apps:
+    - com.mattjakeman.ExtensionManager.Locale
+    - md.obsidian.Obsidian
+
+write_files:
+  - path: ${HOME}/.backup/README.md
+    content: |
+      This is a backup directory for vim.
+
+packages:
+  - atuin
+  - btop
+  - clang-tools-extra
+  - curl
+  - docker
+  - git
+  - htop
+  - keepassxc
+  - lm_sensors
+  - lshw
+  - mosh
+  - neovim
+  - nvtop
+  - python3-pip
+  - remmina
+  - remmina-plugins-rdp
+  - restic
+  - sqlite
+  - stow
+  - the_silver_searcher
+  - tmux
+  - vim
+  - zsh
+  # Desktop
+  - geary
+  - evolution-ews
+  - dconf-editor
+  - flatseal
+  - syncthing
+  # Media 
+  - gimp
+  - gstreamer1-plugin-openh264
+  - gstreamer1-vaapi
+  - igt-gpu-tools
+  - libheif-tools
+  - libva-utils
+  # Networking
+  - arp-scan
+  - arptools
+  - net-tools
+  - tailscale
+  # Font Stack and themeing
+  - cabextract
+  - fira-code-fonts
+  - gnome-extensions-app
+  - gnome-shell-extension-appindicator
+  - gnome-shell-extension-dash-to-dock
+  - gnome-shell-extension-user-theme
+  - gnome-tweaks
+  - liberation-fonts
+  - rsms-inter-fonts
+  - sassc
+  - xorg-x11-font-utils
+  - glib2-devel
+
+  # This does not work inside rpm-ostree (or at least takes forever)
+  #- https://downloads.sourceforge.net/project/mscorefonts2/rpms/msttcore-fonts-installer-2.6-1.noarch.rpm
+  # so it should be installed under toolbox and the fonts copied to the local user folder:
+  # cp /usr/share/fonts/msttcore ~/.local/share/fonts
+  # fc-cache -v
+
+build:
+  root: ${HOME}/Build
+  repositories:
+    # Theme Repositories
+    - url: https://github.com/vinceliuice/MacTahoe-gtk-theme
+      commands:
+        - ./install.sh --shell -i simple --color dark
+        - ./install.sh --shell -i simple --libadwaita --color dark
+        - sudo ./tweaks.sh --gdm -i simple --flatpak --firefox --dash-to-dock
+    - url: https://github.com/vinceliuice/MacTahoe-icon-theme
+      commands:
+        # this one errors out due to a subcommand
+        - ./install.sh || true
+    - url: https://github.com/vinceliuice/WhiteSur-cursors
+      commands:
+        - ./install.sh
+
+runcmd:
+  - gsettings set org.gnome.desktop.interface cursor-theme WhiteSur-cursors
+  - gsettings set org.gnome.desktop.interface gtk-theme MacTahoe-Light
+  - gsettings set org.gnome.desktop.interface icon-theme MacTahoe
+  - gsettings set org.gnome.desktop.interface font-antialiasing rgba
+  - gsettings set org.gnome.desktop.interface font-hinting slight
+  - gsettings set org.gnome.desktop.interface font-name 'Inter 11'
+  - gsettings set org.gnome.desktop.interface document-font-name 'Inter 11'
+  - gsettings set org.gnome.desktop.interface monospace-font-name 'Fira Code 10'
+  - gsettings set org.gnome.desktop.wm.preferences titlebar-font 'Inter Bold 11'
+  - gsettings set org.gnome.desktop.wm.preferences button-layout 'close,minimize,maximize:appmenu'
+  - xdg-desktop-menu forceupdate
+  - fc-cache ${HOME}/.local/share/fonts
+  - pip3 install --upgrade gnome-extensions-cli
+  # these will only work when PATH includes ~/.local/bin
+  - gext install appindicatorsupport@rgcjonas.gmail.com
+  - gext install syncthing@gnome.2nv2u.com
+  - gext install notification-banner-reloaded@marcinjakubowski.github.com
+  - gext install quick-settings-tweaks@qwreey
+  - gext install BingWallpaper@ineffable-gmail.com
+  - gext install tailscale@joaophi.github.com
+  - gext install Vitals@CoreCoding.com
+  - gext install tilingshell@ferrarodomenico.com
+  - gext install task-widget@juozasmiskinis.gitlab.io
+  - gext install just-perfection-desktop@just-perfection
+  # macOS-style tweaks
+  - gext install kiwi@kemma
+  - gext install kiwimenu@kemma
+  # Syncthing
+  - systemctl enable --user --now syncthing
+  - echo 'fs.inotify.max_user_watches=600000' | sudo tee -a /etc/sysctl.conf
+  # Tailscale
+  - sudo systemctl enable --now tailscaled
+  - sudo tailscale set --operator=${USER}
+  # video overrides and Microsoft packages (Edge, VS Code)
+  - sudo rpm-ostree install https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+  - sudo rpm-ostree override remove noopenh264 --install openh264 --install mozilla-openh264 --install code --install microsoft-edge-stable
+  # NEED TO REBOOT AFTER THE ABOVE AND THEN DO THESE MANUALLY 
+  # - this ensures rpmfusion will be in lockstep with Fedora updates
+  #- sudo rpm-ostree update --uninstall $(rpm -q rpmfusion-free-release) --uninstall $(rpm -q rpmfusion-nonfree-release) --install rpmfusion-free-release --install rpmfusion-nonfree-release
+  # install mozilla support for openh264
+  #- sudo rpm-ostree override remove noopenh264 --install openh264 --install gstreamer1-plugin-openh264 --install mozilla-openh264
+  # Swap ffmpeg
+  #- sudo rpm-ostree override remove libavcodec-free libavfilter-free libavformat-free libavutil-free libpostproc-free libswresample-free libswscale-free ffmpeg-free libavdevice-free --install ffmpeg --install mesa-va-drivers-freeworld
+  # Facetime HD Camera on Macbook Air
+  # - sudo curl -L -o /etc/yum.repos.d/_copr_mulderje-facetimehd-kmod.repo     "https://copr.fedorainfracloud.org/coprs/mulderje/facetimehd-kmod/repo/fedora-$(rpm -E %fedora)/mulderje-facetimehd-kmod-fedora-$(rpm -E %fedora).repo"
+  # - sudo  rpm-ostree install facetimehd-kmod
+
+
+groups:
+  docker: ${USER}
+  dialout: ${USER}
+  audio: ${USER}
+  video: ${USER}
+
