@@ -1,4 +1,7 @@
 ---
+
+# this requires software-properties-common to be installed
+
 ppa:
   - ppa:mozillateam/ppa
 

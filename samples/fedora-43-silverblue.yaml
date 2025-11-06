@@ -56,6 +56,7 @@ packages:
   - dconf-editor
   - flatseal
   - keepassxc
+  - syncthing
   # Media 
   - gimp
   - gstreamer1-plugin-openh264
