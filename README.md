@@ -1,5 +1,7 @@
 # ground-init
 
+![Icon](icon-256.png)
+
 Set up a local Linux or macOS desktop automatically using a Python script. Requires `PyYAML` (`pip install pyyaml`).
 
 ## But Why?
